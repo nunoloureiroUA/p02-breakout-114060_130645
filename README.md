@@ -1,58 +1,155 @@
-# <img src="server/viewer/favicon.svg" alt="logo" width="128" height="128" align="middle"> SI2 - Breakout
+# <img src="server/viewer/favicon.svg" alt="logo" width="128" height="128" align="middle"> SI2 - Breakout: Agente Autónomo com DDQN
 
-A Breakout game implementation using the `ai-game-framework`.
+**Unidade Curricular:** Sistemas Inteligentes II (2026)  
+**Projeto 02:** Breakout  
+**Grupo:** - [Nome do Estudante 1] - [Número]  
+- [Nome do Estudante 2] - [Número]  
 
-## Features
-- Real-time backend server.
-- Web-based viewer with Canvas API.
-- Dummy agent (ball tracker).
-- Manual agent (terminal-based A/D control).
+---
 
-## Setup & Running the Game
+## 1. Descrição e Objetivos do Projeto
 
-### 1. Prerequisites
-- Python 3.10+ installed on your host.
+Este projeto consiste no desenvolvimento de um agente autónomo baseado em Reinforcement Learning (RL) para jogar o clássico jogo Breakout. [cite_start]O jogo decorre num espaço de coordenadas contínuo (600x400), onde uma bola ressalta nas paredes e numa raquete controlada pelo agente[cite: 39]. [cite_start]O estado do jogo inclui a posição da bola, o seu raio e velocidade, a largura e posição da raquete, bem como a lista de tijolos ativos.
 
-### 2. Create and Activate Virtual Environment
-Create a virtual environment (`venv`) to isolate dependencies:
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
+[cite_start]O grande objetivo é implementar um agente inteligente capaz de mover a raquete (OESTE/ESTE) para manter a bola em jogo, destruindo todas as colunas de tijolos e maximizando a pontuação final[cite: 41].
 
-### 3. Install Dependencies
-Install the required packages (this will install the local `ai-game-framework` package in editable mode and `numpy`):
-```bash
-pip install -r requirements.txt
-```
+---
 
-### 4. Run the Game Server
-Start the backend server (which also serves the frontend web viewer):
-```bash
-python3 -m server.server
-```
+## 2. Instalação e Execução
 
-### 5. Open the Viewer
-Open your web browser and navigate to:
-```
-http://localhost:8765/
-```
+### 2.1. Pré-requisitos e Instalação
 
-### 6. Run the Agents
-In a separate terminal (ensure the virtual environment is activated):
+1. É necessário ter o **Python 3.10+** instalado.
 
-- **Dummy Agent (Ball Tracker)**:
+2. Criar e ativar o ambiente virtual:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # No Windows: venv\Scripts\activate
+   ```
+3. Instalar as dependências:
   ```bash
-  python3 -m agents.dummy_agent
+  pip install -r requirements.txt
   ```
 
-- **Manual Agent (Terminal A/D control)**:
-  ```bash
-  python3 -m agents.manual_agent
-  ```
 
-## Development
-The project structure:
-- `server/`: Game logic, server implementation, and visualizer assets (inside `server/viewer/`).
-- `agents/`: Autonomous and manual agent implementations.
-- `tests/`: Game unit tests.
+
+### 2.2. Executar o Servidor e o Visualizador
+
+Inicie o servidor backend (que também serve o frontend web):
+
+```bash
+python3 -m src.server.server
+
+```
+
+Abra o navegador e aceda a: `http://localhost:8765/`
+
+### 2.3. Executar os Agentes
+
+Num terminal separado (com o ambiente virtual ativado):
+
+* **Agente DDQN (Agente desenvolvido)**:
+```bash
+python3 -m src.agents.ddqn.dqn_agent
+
+```
+
+
+* **Agente Dummy (Segue a bola de forma heurística)**:
+```bash
+python3 -m src.agents.dummy_agent
+
+```
+
+
+* **Agente Manual (Controlo pelo terminal via A/D)**:
+```bash
+python3 -m src.agents.manual_agent
+
+```
+
+
+
+### 2.4. Treinar um Novo Modelo
+
+Para iniciar um novo treino de raiz usando a arquitetura DDQN:
+
+```bash
+python3 -m scripts.train_dqn
+
+```
+
+Para gerar os gráficos de avaliação após o treino:
+
+```bash
+python3 -m scripts.plot_graphs
+
+```
+
+---
+
+## 3. Arquitetura da Solução
+
+A solução desenvolvida utiliza o algoritmo **Double Deep Q-Network (DDQN)**. O DDQN foi escolhido por mitigar a sobrestimação dos valores Q (Q-values) típica do DQN tradicional, separando a seleção da ação da sua avaliação.
+
+### 3.1. Representação do Estado
+
+A representação do estado fornecida pela simulação  foi transformada num vetor numérico contínuo para alimentar a rede neuronal. Este vetor `STATE_DIM` codifica:
+
+* Posições (X, Y) da bola e da raquete.
+* Distâncias relativas entre a bola e a raquete.
+* Velocidades e direções vetoriais.
+* Informações compactadas sobre a disposição dos tijolos restantes.
+
+### 3.2. Modelo da Rede Neuronal (Q-Network)
+
+A arquitetura base é uma rede neuronal Multilayer Perceptron (MLP) simples e eficiente, constituída por camadas lineares intercaladas por funções de ativação não-lineares (como ReLU). A rede recebe o vetor de estado como *input* e devolve os *Q-values* para cada ação possível no *output* (Mover Esquerda, Ficar Parado, Mover Direita).
+
+### 3.3. Função de Recompensa (Reward Function)
+
+A função de recompensa (Reward Shaping) foi cuidadosamente desenhada para acelerar a convergência:
+
+* **Recompensas Positivas:** Ganho pelo diferencial de `score` (quando um tijolo é destruído).
+* **Penalizações Severas:** `-10` por perder uma vida e `-20` por *Game Over*.
+* **Shaping Contínuo:** Uma leve penalização baseada na distância horizontal entre o centro da raquete e a bola (`-0.01 * abs(dist)`). Isto "ensina" o agente a seguir a bola mesmo antes de aprender que deixá-la cair resulta numa penalização massiva.
+
+### 3.4. Hiperparâmetros
+
+* **Learning Rate:** `5e-4` (Adam Optimizer)
+* **Gamma (Fator de Desconto):** `0.99`
+* **Batch Size:** `64`
+* **Buffer Size (Replay Memory):** `200000`
+* **Tau (Soft Update da Target Net):** `0.005`
+* **Epsilon:** Decaimento linear de `1.0` para `0.1` ao longo de 170 episódios.
+
+---
+
+## 4. Avaliação e Análise de Performance
+
+O modelo foi treinado ao longo de 200 episódios. Abaixo encontra-se a análise das métricas extraídas durante o treino.
+
+### 4.1. Decaimento de Epsilon e Buffer
+
+O agente seguiu uma estratégia de *epsilon-greedy*. Como demonstra o gráfico do epsilon, a exploração foi decrescendo progressivamente, estabilizando no seu limite mínimo de 0.1 no episódio 170, focando-se a partir daí na *exploração do que já sabe* (exploitation). Em simultâneo, o Replay Buffer acumulou as experiências, esgotando a sua capacidade máxima de 200.000 transições por volta do episódio 150.
+
+### 4.2. Convergência e Score por Episódio
+
+O treino apresenta um ponto de viragem ("Aha moment") notável por volta do **episódio 125**. Até esse ponto, as recompensas e pontuações do agente mantiveram-se quase nulas devido à aleatoriedade das ações. A partir do episódio 130-140, a aprendizagem estabiliza brutalmente e o agente começa a atingir pontuações consistentemente altas, com o `Reward total` e o `Score` a espelharem trajetórias idênticas, culminando em picos de perto de 2000 pontos.
+
+### 4.3. Duração da Sobrevivência e Loss
+
+Com o aumento de pontuação, ocorreu também um aumento substancial do número de *frames* sobrevividos, com o agente a atingir repetidamente o limite máximo de segurança imposto por código de `20000` passos. A *Loss* (Smooth L1) apresenta o formato clássico no Deep Q-Learning: um aumento drástico inicial conforme a rede tenta acomodar grandes recompensas no buffer, seguido de um declive gradual à medida que os *targets* de Q-value estabilizam, terminando em valores de perda residuais (≈0.1).
+
+### 4.4. Teste de Resistência (Agente Infinito)
+
+O agente final obteve uma performance super-humana. Num teste de resistência sem limite forçado de episódios (como demonstra a captura de ecrã abaixo), o agente conseguiu jogar de forma ininterrupta durante **mais de 1 hora e 21 minutos**, acumulando um impressionante `Score` superior a **9650 pontos** sem perder todas as vidas.
+
+---
+
+## 5. Licença
+
+[Indicar a licença se aplicável, ex: MIT License]
+
+```
+
+```

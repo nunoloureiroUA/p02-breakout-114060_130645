@@ -2,7 +2,6 @@ __author__ = "Mário Antunes"
 __version__ = "1.0.0"
 __status__ = "Development"
 
-from typing import Any, Dict, List, Optional
 
 NUM_BRICKS = 16
 STATE_DIM = 8 + NUM_BRICKS

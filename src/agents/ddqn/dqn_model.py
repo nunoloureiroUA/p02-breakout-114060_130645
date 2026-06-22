@@ -1,7 +1,3 @@
-__author__ = "Mário Antunes"
-__version__ = "1.0.0"
-__status__ = "Development"
-
 import torch
 import torch.nn as nn
 
