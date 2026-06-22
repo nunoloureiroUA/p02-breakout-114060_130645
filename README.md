@@ -37,7 +37,7 @@ O grande objetivo é implementar um agente inteligente capaz de mover a raquete 
 Inicie o servidor backend (que também serve o frontend web):
 
 ```bash
-python3 -m src.server.server
+python -m src.server.server
 
 ```
 
@@ -49,21 +49,21 @@ Num terminal separado (com o ambiente virtual ativado):
 
 * **Agente DDQN (Agente desenvolvido)**:
 ```bash
-python3 -m src.agents.ddqn.dqn_agent
+python -m src.agents.ddqn.dqn_agent
 
 ```
 
 
 * **Agente Dummy (Segue a bola de forma heurística)**:
 ```bash
-python3 -m src.agents.dummy_agent
+python -m src.agents.dummy_agent
 
 ```
 
 
 * **Agente Manual (Controlo pelo terminal via A/D)**:
 ```bash
-python3 -m src.agents.manual_agent
+python -m src.agents.manual_agent
 
 ```
 
@@ -77,7 +77,7 @@ Para iniciar um novo treino de raiz usando a arquitetura DDQN:
 python3 -m scripts.train_dqn
 
 ```
-***Nota:*** Pode fazer adicionar ```-h``` à frente para configurar os parametros de treino 
+***Nota:*** Pode adicionar ```-h``` à frente para configurar os parametros de treino 
 
 Para gerar os gráficos de avaliação após o treino:
 
@@ -167,3 +167,11 @@ O agente final obteve uma boa performance. Num teste de resistência sem limite 
 
 ---
 
+## 5. Trabalho Futuro
+
+Durante a análise de performance, observou-se que o comportamento atual do agente é predominantemente **passivo e defensivo**. Devido à pesada penalização imposta pela perda de vidas e pelo *Game Over*, o modelo otimizou a sua política para garantir a sobrevivência a longo prazo (manter a bola em jogo), acabando por destruir os tijolos de forma reativa e circunstancial.
+
+Para tornar o agente mais **agressivo, ofensivo e eficiente**, propõem-se as seguintes melhorias para trabalho futuro:
+
+* **Reintrodução da Matriz de Tijolos no Estado:** Expandir o vetor de estado (`STATE_DIM`) para incluir a informação exata dos tijolos que ainda faltam partir (ex: um vetor binário de blocos ativos). Isto daria à rede neuronal a capacidade de "ver" os alvos e aprender ângulos de ressalto para direcionar a bola ativamente para as zonas com mais tijolos.
+* **Ajuste do *Reward Shaping*:** Afinar a função de recompensa para incentivar a rapidez. Poderia ser introduzida uma pequena penalização por tempo (para forçar o agente a limpar o ecrã mais rápido) ou um multiplicador de recompensa (para recompensar *combos* de tijolos partidos num curto espaço de tempo).

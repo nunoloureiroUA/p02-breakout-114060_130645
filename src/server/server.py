@@ -7,7 +7,7 @@ import logging
 from typing import Dict, Any, Optional
 
 import aigf.interface as interface
-import server.logic as logic
+import src.server.logic as logic
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - BREAKOUT - %(levelname)s - %(message)s")
 
