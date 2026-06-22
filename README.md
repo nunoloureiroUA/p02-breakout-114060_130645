@@ -1,17 +1,16 @@
-# <img src="server/viewer/favicon.svg" alt="logo" width="128" height="128" align="middle"> SI2 - Breakout: Agente Autónomo com DDQN
+# <img src="server/viewer/favicon.svg" alt="logo" width="128" height="128" align="middle"> SI2 - Breakout
 
-**Unidade Curricular:** Sistemas Inteligentes II (2026)  
-**Projeto 02:** Breakout  
-**Grupo:** - [Nome do Estudante 1] - [Número]  
-- [Nome do Estudante 2] - [Número]  
+**Grupo:** 
+- Nuno Loureiro - 130645
+- Orlando Marinheiro - 114060
 
 ---
 
 ## 1. Descrição e Objetivos do Projeto
 
-Este projeto consiste no desenvolvimento de um agente autónomo baseado em Reinforcement Learning (RL) para jogar o clássico jogo Breakout. [cite_start]O jogo decorre num espaço de coordenadas contínuo (600x400), onde uma bola ressalta nas paredes e numa raquete controlada pelo agente[cite: 39]. [cite_start]O estado do jogo inclui a posição da bola, o seu raio e velocidade, a largura e posição da raquete, bem como a lista de tijolos ativos.
+Este projeto consiste no desenvolvimento de um agente autónomo baseado em Reinforcement Learning (RL) para jogar o clássico jogo Breakout. O jogo decorre num espaço de coordenadas contínuo (600x400), onde uma bola ressalta nas paredes e numa raquete controlada pelo agente. O estado do jogo inclui a posição da bola, o seu raio e velocidade, a largura e posição da raquete, bem como a lista de tijolos ativos.
 
-[cite_start]O grande objetivo é implementar um agente inteligente capaz de mover a raquete (OESTE/ESTE) para manter a bola em jogo, destruindo todas as colunas de tijolos e maximizando a pontuação final[cite: 41].
+O grande objetivo é implementar um agente inteligente capaz de mover a raquete (OESTE/ESTE) para manter a bola em jogo, destruindo todas as colunas de tijolos e maximizando a pontuação final.
 
 ---
 
@@ -22,10 +21,10 @@ Este projeto consiste no desenvolvimento de um agente autónomo baseado em Reinf
 1. É necessário ter o **Python 3.10+** instalado.
 
 2. Criar e ativar o ambiente virtual:
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate  # No Windows: venv\Scripts\activate
-   ```
+  ```bash
+  python3 -m venv venv
+  source venv/bin/activate  # No Windows: venv\Scripts\activate
+  ```
 3. Instalar as dependências:
   ```bash
   pip install -r requirements.txt
@@ -78,6 +77,7 @@ Para iniciar um novo treino de raiz usando a arquitetura DDQN:
 python3 -m scripts.train_dqn
 
 ```
+***Nota:*** Pode fazer adicionar ```-h``` à frente para configurar os parametros de treino 
 
 Para gerar os gráficos de avaliação após o treino:
 
@@ -132,24 +132,36 @@ O modelo foi treinado ao longo de 200 episódios. Abaixo encontra-se a análise 
 
 O agente seguiu uma estratégia de *epsilon-greedy*. Como demonstra o gráfico do epsilon, a exploração foi decrescendo progressivamente, estabilizando no seu limite mínimo de 0.1 no episódio 170, focando-se a partir daí na *exploração do que já sabe* (exploitation). Em simultâneo, o Replay Buffer acumulou as experiências, esgotando a sua capacidade máxima de 200.000 transições por volta do episódio 150.
 
+<p align="center">
+  <img src="assets/grafico_epsilon.png" width="45%" />
+  <img src="assets/grafico_buffer.png" width="45%" />
+</p>
+
 ### 4.2. Convergência e Score por Episódio
 
 O treino apresenta um ponto de viragem ("Aha moment") notável por volta do **episódio 125**. Até esse ponto, as recompensas e pontuações do agente mantiveram-se quase nulas devido à aleatoriedade das ações. A partir do episódio 130-140, a aprendizagem estabiliza brutalmente e o agente começa a atingir pontuações consistentemente altas, com o `Reward total` e o `Score` a espelharem trajetórias idênticas, culminando em picos de perto de 2000 pontos.
+
+<p align="center">
+  <img src="assets/grafico_convergencia.png" width="45%" />
+  <img src="assets/grafico_score.png" width="45%" />
+</p>
 
 ### 4.3. Duração da Sobrevivência e Loss
 
 Com o aumento de pontuação, ocorreu também um aumento substancial do número de *frames* sobrevividos, com o agente a atingir repetidamente o limite máximo de segurança imposto por código de `20000` passos. A *Loss* (Smooth L1) apresenta o formato clássico no Deep Q-Learning: um aumento drástico inicial conforme a rede tenta acomodar grandes recompensas no buffer, seguido de um declive gradual à medida que os *targets* de Q-value estabilizam, terminando em valores de perda residuais (≈0.1).
 
-### 4.4. Teste de Resistência (Agente Infinito)
+<p align="center">
+  <img src="assets/grafico_duracao_episodio.png" width="45%" />
+  <img src="assets/grafico_loss.png" width="45%" />
+</p>
+
+### 4.4. Teste do modelo desenvolvido
 
 O agente final obteve uma performance super-humana. Num teste de resistência sem limite forçado de episódios (como demonstra a captura de ecrã abaixo), o agente conseguiu jogar de forma ininterrupta durante **mais de 1 hora e 21 minutos**, acumulando um impressionante `Score` superior a **9650 pontos** sem perder todas as vidas.
 
+<p align="center">
+  <img src="assets/agente_infinito.png" width="80%" />
+</p>
+
 ---
 
-## 5. Licença
-
-[Indicar a licença se aplicável, ex: MIT License]
-
-```
-
-```
