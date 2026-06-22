@@ -141,7 +141,7 @@ O agente seguiu uma estratégia de *epsilon-greedy*. Como demonstra o gráfico d
 
 ### 4.2. Convergência e Score por Episódio
 
-O treino apresenta um ponto de viragem ("Aha moment") notável por volta do **episódio 125**. Até esse ponto, as recompensas e pontuações do agente mantiveram-se quase nulas devido à aleatoriedade das ações. A partir do episódio 130-140, a aprendizagem estabiliza e o agente começa a atingir pontuações mais altas, com o `Reward total` e o `Score` a fazerem trajetórias idênticas, terminando em picos com perto de 2000 pontos.
+O treino apresenta um ponto de viragem notável por volta do **episódio 125**. Até esse ponto, as recompensas e pontuações do agente mantiveram-se quase nulas devido à aleatoriedade das ações. A partir do episódio 130-140, a aprendizagem estabiliza e o agente começa a atingir pontuações mais altas, com o `Reward total` e o `Score` a fazerem trajetórias idênticas, terminando em picos com perto de 2000 pontos.
 
 <p align="center">
   <img src="assets/grafico_convergencia.png" width="45%" />
