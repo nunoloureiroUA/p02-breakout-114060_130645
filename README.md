@@ -1,4 +1,4 @@
-# <img src="server/viewer/favicon.svg" alt="logo" width="128" height="128" align="middle"> SI2 - Breakout
+# <img src="src/server/viewer/favicon.svg" alt="logo" width="128" height="128" align="middle"> SI2 - Breakout
 
 **Grupo:** 
 - Nuno Loureiro - 130645
@@ -94,24 +94,26 @@ A solução desenvolvida utiliza o algoritmo **Double Deep Q-Network (DDQN)**. O
 
 ### 3.1. Representação do Estado
 
-A representação do estado fornecida pela simulação  foi transformada num vetor numérico contínuo para alimentar a rede neuronal. Este vetor `STATE_DIM` codifica:
+A representação do estado fornecida pela simulação foi transformada num vetor numérico contínuo para alimentar a rede neuronal. Por forma a otimizar a aprendizagem e reduzir a complexidade, o vetor `STATE_DIM` (tamanho 6) codifica estritamente as variáveis físicas essenciais:
 
-* Posições (X, Y) da bola e da raquete.
-* Distâncias relativas entre a bola e a raquete.
-* Velocidades e direções vetoriais.
-* Informações compactadas sobre a disposição dos tijolos restantes.
+* Posição (X) do centro da raquete.
+* Posições (X, Y) da bola.
+* Velocidades e direções vetoriais da bola (dx, dy).
+* Distância relativa horizontal entre a bola e o centro da raquete.
+
+*Nota: O agente demonstrou capacidade de inferir a necessidade de limpar as colunas de tijolos apenas pela física da bola, sem necessidade de receber a matriz de tijolos no estado.*
 
 ### 3.2. Modelo da Rede Neuronal (Q-Network)
 
 A arquitetura base é uma rede neuronal Multilayer Perceptron (MLP) simples e eficiente, constituída por camadas lineares intercaladas por funções de ativação não-lineares (como ReLU). A rede recebe o vetor de estado como *input* e devolve os *Q-values* para cada ação possível no *output* (Mover Esquerda, Ficar Parado, Mover Direita).
 
-### 3.3. Função de Recompensa (Reward Function)
+### 3.3. Função de Recompensa
 
-A função de recompensa (Reward Shaping) foi cuidadosamente desenhada para acelerar a convergência:
+A função de recompensa (Reward Shaping) foi feita para acelerar a convergência e focar o agente na sobrevivência:
 
-* **Recompensas Positivas:** Ganho pelo diferencial de `score` (quando um tijolo é destruído).
-* **Penalizações Severas:** `-10` por perder uma vida e `-20` por *Game Over*.
-* **Shaping Contínuo:** Uma leve penalização baseada na distância horizontal entre o centro da raquete e a bola (`-0.01 * abs(dist)`). Isto "ensina" o agente a seguir a bola mesmo antes de aprender que deixá-la cair resulta numa penalização massiva.
+* **Recompensas Positivas:** Ganho pelo diferencial de `score` (sempre que a bola destrói um tijolo).
+* **Penalizações Severas:** `-10` pontos por perder uma vida e `-20` pontos em caso de *Game Over*.
+* **Shaping Contínuo:** Uma leve penalização baseada no diferencial das coordenadas a cada frame (`-0.01`). Este ligeiro decaimento força o agente a procurar a recompensa ativamente, evitando que fique parado indefinidamente sem resolver o jogo.
 
 ### 3.4. Hiperparâmetros
 
@@ -139,7 +141,7 @@ O agente seguiu uma estratégia de *epsilon-greedy*. Como demonstra o gráfico d
 
 ### 4.2. Convergência e Score por Episódio
 
-O treino apresenta um ponto de viragem ("Aha moment") notável por volta do **episódio 125**. Até esse ponto, as recompensas e pontuações do agente mantiveram-se quase nulas devido à aleatoriedade das ações. A partir do episódio 130-140, a aprendizagem estabiliza brutalmente e o agente começa a atingir pontuações consistentemente altas, com o `Reward total` e o `Score` a espelharem trajetórias idênticas, culminando em picos de perto de 2000 pontos.
+O treino apresenta um ponto de viragem ("Aha moment") notável por volta do **episódio 125**. Até esse ponto, as recompensas e pontuações do agente mantiveram-se quase nulas devido à aleatoriedade das ações. A partir do episódio 130-140, a aprendizagem estabiliza e o agente começa a atingir pontuações mais altas, com o `Reward total` e o `Score` a fazerem trajetórias idênticas, terminando em picos com perto de 2000 pontos.
 
 <p align="center">
   <img src="assets/grafico_convergencia.png" width="45%" />
@@ -157,7 +159,7 @@ Com o aumento de pontuação, ocorreu também um aumento substancial do número 
 
 ### 4.4. Teste do modelo desenvolvido
 
-O agente final obteve uma performance super-humana. Num teste de resistência sem limite forçado de episódios (como demonstra a captura de ecrã abaixo), o agente conseguiu jogar de forma ininterrupta durante **mais de 1 hora e 21 minutos**, acumulando um impressionante `Score` superior a **9650 pontos** sem perder todas as vidas.
+O agente final obteve uma boa performance. Num teste de resistência sem limite de episódios (como demonstra a captura de ecrã abaixo), o agente conseguiu jogar de forma ininterrupta durante **mais de 1 hora e 21 minutos**, acumulando um `Score` superior a **9650 pontos** sem perder uma única vida.
 
 <p align="center">
   <img src="assets/agente_infinito.png" width="80%" />
